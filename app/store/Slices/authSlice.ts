@@ -21,6 +21,8 @@ export const loginUser = createAsyncThunk<User, LoginPayload>(
           password,
         }
       );
+      console.log("User logged in:", response.data);
+      console.log("Client IP:", response.data.ipAddress);
 
       return response.data;
     } catch (error: any) {
@@ -54,17 +56,14 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    // loginSuccess: (state, action: PayloadAction<User>) => {
-    //   state.user = action.payload;
-    //   state.token = action.payload.token || null;
-    //   state.isAuthenticated = true;
-    // },
     logOut: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
       state.loading = false;
       state.error = null;
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
     },
     clearMessages: (state) => {
       state.error = null;
@@ -83,6 +82,11 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.token = action.payload.token || null;
         state.isAuthenticated = true;
+
+        if (action.payload.token) {
+          localStorage.setItem("token", action.payload.token);
+          localStorage.setItem("user", JSON.stringify(action.payload));
+        }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;

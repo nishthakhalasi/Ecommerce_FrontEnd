@@ -15,7 +15,6 @@ import { useEffect, useState } from "react";
 export default function ProductCard({ product }) {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
-  console.log("Token in ProductCard:", token);
 
   const cartItems = useSelector((state) => state.cart.items) || [];
   const [inCart, setInCart] = useState(false);
