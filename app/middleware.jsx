@@ -46,5 +46,6 @@ export const config = {
     "/cart/:path*",
     "/api/carts/:path*",
     "/order-summary/:orderId",
+    "/about/:path*",
   ],
 };

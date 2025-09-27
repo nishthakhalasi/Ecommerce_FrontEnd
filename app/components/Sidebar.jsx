@@ -34,18 +34,12 @@ export default function Sidebar() {
         >
           <Package size={24} /> Products
         </Link>
-        <Link
+        {/* <Link
           href="/admin/orders"
           className="flex items-center gap-4 py-3 px-4 text-lg rounded-xl hover:bg-indigo-700 transition"
         >
           <ShoppingCart size={24} /> Orders
-        </Link>
-        <Link
-          href="/admin/settings"
-          className="flex items-center gap-4 py-3 px-4 text-lg rounded-xl hover:bg-indigo-700 transition"
-        >
-          <Settings size={24} /> Settings
-        </Link>
+        </Link> */}
       </nav>
       <div className="p-6 border-t border-indigo-500 text-sm text-center opacity-80">
         © 2025 Admin Panel

@@ -45,7 +45,6 @@ export default function CheckoutPage() {
       } else if (result.paymentIntent.status === "succeeded") {
         toast.success("Payment successful 🎉");
 
-        // Create order in backend
         const orderAction = await dispatch(createOrder({ token })).unwrap();
         dispatch(clearCart());
         router.push(`/order-summary/${orderAction.id}`);

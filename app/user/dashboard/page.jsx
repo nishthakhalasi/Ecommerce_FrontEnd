@@ -12,10 +12,11 @@ export default function UserDashboard() {
   const router = useRouter();
 
   const handleLogout = () => {
+    dispatch(logOut());
     Cookies.remove("token");
     Cookies.remove("role");
     Cookies.remove("user");
-    dispatch(logOut());
+
     router.push("/auth/login");
   };
 

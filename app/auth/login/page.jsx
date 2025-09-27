@@ -14,29 +14,24 @@ export default function Login() {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
 
-  const { user, isAuthenticated, loading, error } = useSelector(
-    (state) => state.auth
-  );
+  const { loading, error } = useSelector((state) => state.auth);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginUser(formData));
-  };
+    try {
+      const result = await dispatch(loginUser(formData)).unwrap();
+      Cookies.set("token", result.token, { expires: 7 });
+      Cookies.set("role", result.role, { expires: 7 });
 
-  useEffect(() => {
-    if (isAuthenticated && user?.role && user?.token) {
-      Cookies.set("token", user.token, { expires: 7 });
-      Cookies.set("role", user.role, { expires: 7 });
-      // Cookies.set("user", JSON.stringify(user), { expires: 7 });
-      if (user.role === "ADMIN") router.replace("/admin/dashboard");
-      else if (user.role === "USER") router.replace("/");
+      if (result.role === "ADMIN") router.replace("/admin/dashboard");
+      else if (result.role === "USER") router.replace("/");
+    } catch (err) {
+      console.error("Login failed:", err);
     }
-  }, [isAuthenticated, user, router]);
-
-  if (loading) return <Spinner />;
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">

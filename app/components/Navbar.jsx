@@ -16,22 +16,21 @@ export default function Navbar() {
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
 
+  if (!user) return null;
+
   const profileImage = user?.profilePicture
     ? `http://localhost:3000${user.profilePicture}`
     : "/default-avatar.png";
 
   const handleLogout = () => {
-    setShowMenu(false);
     dispatch(logOut());
     Cookies.remove("token");
     Cookies.remove("role");
     Cookies.remove("user");
-
     router.replace("/auth/login");
   };
 
-  // Admin Navbar
-  if (user?.role === "ADMIN") {
+  if (user.role === "ADMIN") {
     return (
       <div className="flex justify-between items-center bg-white shadow-md px-6 py-4 mb-6 rounded">
         <h1 className="text-2xl font-semibold text-gray-700">
@@ -71,8 +70,7 @@ export default function Navbar() {
     );
   }
 
-  // User Navbar
-  if (user?.role === "USER") {
+  if (user.role === "USER") {
     return (
       <nav className="sticky top-0 z-50 bg-white border-b w-full">
         <div className="flex items-center justify-between px-4 md:px-8 py-2 w-full">
@@ -102,13 +100,11 @@ export default function Navbar() {
             <Link href="/user/products" className="hover:text-black transition">
               Products
             </Link>
-            <Link href="/new-arrivals" className="hover:text-black transition">
-              New Arrivals
-            </Link>
-            <Link href="/packages" className="hover:text-black transition">
-              Packages
+            <Link href="/user/about" className="hover:text-black transition">
+              AboutUS
             </Link>
           </div>
+
           <div className="flex items-center space-x-4 text-lg relative">
             <Link href="/user/cart" className="relative group">
               <ShoppingCart className="w-7 h-7 text-gray-700 group-hover:text-black transition" />

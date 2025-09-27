@@ -98,8 +98,8 @@ export const updateProduct = createAsyncThunk<
 );
 
 export const deleteProduct = createAsyncThunk<
-  string,
-  { token: string; id: string }
+  number,
+  { token: string; id: number }
 >("products/deleteProduct", async ({ token, id }, { rejectWithValue }) => {
   try {
     const res = await fetch(
@@ -113,7 +113,11 @@ export const deleteProduct = createAsyncThunk<
       }
     );
 
-    if (!res.ok) throw new Error("Failed to delete product");
+    if (!res.ok) {
+      const data = await res.json();
+      return rejectWithValue(data.message || "Failed to delete product");
+    }
+
     return id;
   } catch (err: any) {
     return rejectWithValue(err.message);
@@ -165,14 +169,11 @@ const productsSlice = createSlice({
         }
       )
 
-      // Delete
       .addCase(
         deleteProduct.fulfilled,
-        (state, action: PayloadAction<string>) => {
+        (state, action: PayloadAction<number>) => {
           state.products = state.products.filter(
-            (p) =>
-              String(p.id) !== action.payload &&
-              String(p._id) !== action.payload
+            (p) => p.id !== action.payload
           );
         }
       );
