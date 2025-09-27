@@ -11,7 +11,7 @@ export const fetchUsers = createAsyncThunk<User[], string>(
   "user/fetchUsers",
   async (token, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${process.env.BASE_URL}/users`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/users`, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -30,9 +30,12 @@ export const fetchUserById = createAsyncThunk<User, FetchUserByIdPayload>(
   "user/fetchUserById",
   async ({ token, userId }, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${process.env.BASE_URL}/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await res.json();
       if (!res.ok)
         return rejectWithValue(data.message || "Failed to fetch user");
@@ -48,7 +51,7 @@ export const updateUser = createAsyncThunk<User, UpdateUserPayload>(
   async ({ token, userId, formData }, { rejectWithValue }) => {
     try {
       const res = await fetch(
-        `${process.env.BASE_URL}/users/${userId}/update`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/update`,
         {
           method: "PUT",
           headers: { Authorization: `Bearer ${token}` },
@@ -69,10 +72,13 @@ export const deleteUser = createAsyncThunk<string, DeleteUserPayload>(
   "user/deleteUser",
   async ({ token, userId }, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${process.env.BASE_URL}/users/${userId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await res.json();
       if (!res.ok)
         return rejectWithValue(data.message || "Failed to delete user");

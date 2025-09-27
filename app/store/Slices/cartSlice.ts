@@ -17,7 +17,7 @@ export const addToCartAPI = createAsyncThunk<
   "cart/addToCart",
   async ({ token, productId, quantity }, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${process.env.BASE_URL}/carts`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/carts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,7 +42,7 @@ export const fetchCart = createAsyncThunk<CartItem[], string>(
     try {
       console.log(token);
 
-      const res = await fetch(`${process.env.BASE_URL}/carts`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/carts`, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -62,12 +62,15 @@ export const removeFromCartAPI = createAsyncThunk<
   try {
     console.log("cartSlice token:", token);
 
-    const res = await fetch(`${process.env.BASE_URL}/carts/${cartId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/carts/${cartId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     const data = await res.json();
     return cartId;
@@ -83,14 +86,17 @@ export const updateCartQuantityAPI = createAsyncThunk<
   "cart/updateCartQuantity",
   async ({ token, cartItemId, quantity }, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${process.env.BASE_URL}/carts/${cartItemId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ quantity }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/carts/${cartItemId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ quantity }),
+        }
+      );
       const data = await res.json();
       return data;
     } catch (err: any) {
@@ -104,13 +110,16 @@ export const checkoutCart = createAsyncThunk<string, { token: string }>(
     console.log("cartSlice", token);
 
     try {
-      const res = await fetch(`${process.env.BASE_URL}/carts/checkout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/carts/checkout`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await res.json();
 

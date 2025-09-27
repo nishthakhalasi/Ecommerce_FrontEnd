@@ -14,10 +14,14 @@ export const loginUser = createAsyncThunk<User, LoginPayload>(
   "auth/loginUser",
   async ({ email, password }, thunkAPI) => {
     try {
-      const response = await axios.post(`${process.env.BASE_URL}/auth/login`, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/login`,
+        {
+          email,
+          password,
+        }
+      );
+
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
@@ -32,12 +36,11 @@ export const signupUser = createAsyncThunk<User, SignupPayload>(
   async (formData, thunkAPI) => {
     try {
       const res = await axios.post(
-        `${process.env.BASE_URL}/auth/signup`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/signup`,
         formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
+
       return res.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(

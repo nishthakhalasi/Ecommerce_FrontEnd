@@ -7,7 +7,7 @@ export const fetchProducts = createAsyncThunk<Product[], string>(
     if (!token) return rejectWithValue("Token not provided");
 
     try {
-      const res = await fetch(`${process.env.BASE_URL}/products`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/products`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -48,7 +48,7 @@ export const addProduct = createAsyncThunk<
       }
     }
 
-    const res = await fetch(`${process.env.BASE_URL}/products`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/products`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -80,11 +80,14 @@ export const updateProduct = createAsyncThunk<
         }
       }
 
-      const res = await fetch(`${process.env.BASE_URL}/products/${id}`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-        body,
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/products/${id}`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+          body,
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to update product");
       return await res.json();
@@ -99,13 +102,16 @@ export const deleteProduct = createAsyncThunk<
   { token: string; id: string }
 >("products/deleteProduct", async ({ token, id }, { rejectWithValue }) => {
   try {
-    const res = await fetch(`${process.env.BASE_URL}/products/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/products/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!res.ok) throw new Error("Failed to delete product");
     return id;

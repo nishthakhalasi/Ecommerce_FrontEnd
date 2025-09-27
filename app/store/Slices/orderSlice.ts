@@ -20,12 +20,15 @@ export const fetchOrderById = createAsyncThunk<
   { orderId: string; token: string }
 >("order/fetchOrderById", async ({ orderId, token }, { rejectWithValue }) => {
   try {
-    const res = await fetch(`${process.env.BASE_URL}/orders/${orderId}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/orders/${orderId}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     const data = await res.json();
     if (!res.ok)
       return rejectWithValue(data.message || "Failed to fetch order");
@@ -40,7 +43,7 @@ export const createOrder = createAsyncThunk<Order, { token: string }>(
   "order/createOrder",
   async ({ token }, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${process.env.BASE_URL}/orders`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/orders`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
