@@ -24,7 +24,6 @@ export default function Navbar() {
 
   const handleLogout = () => {
     dispatch(logOut());
-    Cookies.remove("token");
     Cookies.remove("role");
     Cookies.remove("user");
     router.replace("/auth/login");

@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { CartItem, CartState } from "../../types/cart";
 import { RootState } from "../store";
+import api from "../../utils/axiosSetup";
+import axios from "axios";
 
 const initialState: CartState = {
   items: [],
@@ -12,124 +14,77 @@ const initialState: CartState = {
 
 export const addToCartAPI = createAsyncThunk<
   CartItem,
-  { token: string; productId: number; quantity: number }
->(
-  "cart/addToCart",
-  async ({ token, productId, quantity }, { rejectWithValue }) => {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/carts`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ productId, quantity }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) return rejectWithValue(data.message || "Failed to add item");
-
-      return data;
-    } catch (err: any) {
-      return rejectWithValue(err.message);
-    }
-  }
-);
-
-export const fetchCart = createAsyncThunk<CartItem[], string>(
-  "cart/fetchCart",
-  async (token, { rejectWithValue }) => {
-    try {
-      console.log(token);
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/carts`, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      console.log("Cart from API:", data);
-      return data;
-    } catch (err: any) {
-      return rejectWithValue(err.message);
-    }
-  }
-);
-
-export const removeFromCartAPI = createAsyncThunk<
-  number,
-  { token: string; cartId: number }
->("cart/removeFromCart", async ({ token, cartId }, { rejectWithValue }) => {
+  { productId: number; quantity: number }
+>("cart/addToCart", async ({ productId, quantity }, { rejectWithValue }) => {
   try {
-    console.log("cartSlice token:", token);
-
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/carts/${cartId}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const data = await res.json();
-    return cartId;
-  } catch (err: any) {
-    return rejectWithValue(err.message);
+    const res = await api.post("/carts", { productId, quantity });
+    return res.data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+    return rejectWithValue("An unexpected error occurred");
   }
 });
 
-export const updateCartQuantityAPI = createAsyncThunk<
-  CartItem,
-  { token: string; cartItemId: number; quantity: number }
->(
-  "cart/updateCartQuantity",
-  async ({ token, cartItemId, quantity }, { rejectWithValue }) => {
+export const fetchCart = createAsyncThunk<CartItem[], string>(
+  "cart/fetchCart",
+  async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/carts/${cartItemId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ quantity }),
-        }
-      );
-      const data = await res.json();
-      return data;
-    } catch (err: any) {
-      return rejectWithValue(err.message);
+      const res = await api.get("/carts");
+      return res.data;
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        return rejectWithValue(err.response?.data?.message || err.message);
+      }
+      return rejectWithValue("An unexpected error occurred");
     }
   }
 );
-export const checkoutCart = createAsyncThunk<string, { token: string }>(
-  "cart/checkoutCart",
-  async ({ token }, { rejectWithValue }) => {
-    console.log("cartSlice", token);
 
+export const removeFromCartAPI = createAsyncThunk<number, { cartId: number }>(
+  "cart/removeFromCart",
+  async ({ cartId }, { rejectWithValue }) => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/carts/checkout`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        return rejectWithValue(data.message || "Checkout failed");
+      const res = await api.delete(`/carts/${cartId}`);
+      return cartId;
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        return rejectWithValue(err.response?.data?.message || err.message);
       }
+      return rejectWithValue("An unexpected error occurred");
+    }
+  }
+);
 
-      return data.clientSecret;
-    } catch (err: any) {
-      return rejectWithValue(err.message);
+export const updateCartQuantityAPI = createAsyncThunk<
+  CartItem,
+  { cartItemId: number; quantity: number }
+>(
+  "cart/updateCartQuantity",
+  async ({ cartItemId, quantity }, { rejectWithValue }) => {
+    try {
+      const res = await api.put(`/carts/${cartItemId}`, { quantity });
+      return res.data;
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        return rejectWithValue(err.response?.data?.message || err.message);
+      }
+      return rejectWithValue("An unexpected error occurred");
+    }
+  }
+);
+export const checkoutCart = createAsyncThunk<string>(
+  "cart/checkoutCart",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await api.post("/carts/checkout");
+      return res.data.clientSecret;
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        return rejectWithValue(err.response?.data?.message || err.message);
+      }
+      return rejectWithValue("An unexpected error occurred");
     }
   }
 );
@@ -155,10 +110,7 @@ const cartSlice = createSlice({
         addToCartAPI.fulfilled,
         (state, action: PayloadAction<CartItem>) => {
           state.loading = false;
-          if (!state.items) state.items = [];
-          if (action.payload) {
-            state.items.push(action.payload);
-          }
+          state.items.push(action.payload);
         }
       )
 
@@ -206,15 +158,8 @@ const cartSlice = createSlice({
       })
       .addCase(updateCartQuantityAPI.fulfilled, (state, action) => {
         state.loading = false;
-        const updatedItem = action.payload;
-
-        const index = state.items.findIndex((i) => i.id === updatedItem.id);
-        if (index !== -1) {
-          state.items[index] = {
-            ...state.items[index],
-            quantity: updatedItem.quantity,
-          };
-        }
+        const index = state.items.findIndex((i) => i.id === action.payload.id);
+        if (index !== -1) state.items[index] = action.payload;
       })
       .addCase(updateCartQuantityAPI.rejected, (state, action) => {
         state.loading = false;

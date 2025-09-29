@@ -9,7 +9,6 @@ import { fetchProducts, deleteProduct } from "../../store/Slices/productsSlice";
 
 export default function ProductsPage() {
   const dispatch = useDispatch();
-  const { token } = useSelector((state) => state.auth);
   const { products, loading, error } = useSelector((state) => state.products);
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
@@ -17,14 +16,12 @@ export default function ProductsPage() {
   const productsPerPage = 4;
 
   useEffect(() => {
-    if (token) {
-      dispatch(fetchProducts(token));
-    }
-  }, [token, dispatch]);
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
   const handleDelete = (id) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
-    dispatch(deleteProduct({ token, id }));
+    dispatch(deleteProduct(id));
   };
 
   // Pagination calculations
@@ -161,7 +158,7 @@ export default function ProductsPage() {
           product={editProduct}
           onClose={() => {
             setShowForm(false);
-            if (token) dispatch(fetchProducts(token));
+            dispatch(fetchProducts());
           }}
         />
       )}

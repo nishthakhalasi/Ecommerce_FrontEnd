@@ -11,7 +11,6 @@ import {
 
 export default function ProductForm({ product, onClose }) {
   const dispatch = useDispatch();
-  const { token } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     name: product?.name || "",
@@ -20,7 +19,6 @@ export default function ProductForm({ product, onClose }) {
     tags: product?.tags?.join(",") || "",
     image: null,
   });
-  console.log(token);
 
   useEffect(() => {
     setFormData({
@@ -48,7 +46,7 @@ export default function ProductForm({ product, onClose }) {
       tags: formData.tags,
     };
 
-    const payload = { token, formData: payloadFormData };
+    const payload = { formData: payloadFormData };
 
     try {
       if (product) {
@@ -57,10 +55,10 @@ export default function ProductForm({ product, onClose }) {
         ).unwrap();
       } else {
         await dispatch(addProduct(payload)).unwrap();
-        await dispatch(fetchProducts(token)).unwrap();
+        await dispatch(fetchProducts()).unwrap();
       }
 
-      dispatch(fetchProducts(token));
+      dispatch(fetchProducts());
       onClose();
     } catch (err) {
       alert(err || "Something went wrong!");

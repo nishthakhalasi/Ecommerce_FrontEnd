@@ -6,8 +6,7 @@ import { loginUser } from "../../store/Slices/authSlice";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
-import Spinner from "../../components/Spinner";
+import { unwrapResult } from "@reduxjs/toolkit";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -22,9 +21,8 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const result = await dispatch(loginUser(formData)).unwrap();
-      Cookies.set("token", result.token, { expires: 7 });
-      Cookies.set("role", result.role, { expires: 7 });
+      const actionResult = await dispatch(loginUser(formData));
+      const result = unwrapResult(actionResult);
 
       if (result.role === "ADMIN") router.replace("/admin/dashboard");
       else if (result.role === "USER") router.replace("/");

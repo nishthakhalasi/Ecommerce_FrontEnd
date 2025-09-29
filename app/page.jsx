@@ -10,14 +10,12 @@ import { fetchProducts } from "./store/Slices/productsSlice";
 
 export default function HomePage() {
   const dispatch = useDispatch();
-  const { token, user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const { products, loading, error } = useSelector((state) => state.products);
 
   useEffect(() => {
-    if (token) {
-      dispatch(fetchProducts(token));
-    }
-  }, [token, dispatch]);
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
   if (loading) return <Spinner />;
 
@@ -103,9 +101,6 @@ export default function HomePage() {
           )}
         </div>
       </section>
-      <p className="text-center mt-2">
-        Your login IP: {user?.ipAddress || "Unknown"}
-      </p>
     </div>
   );
 }

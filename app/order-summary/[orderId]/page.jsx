@@ -9,16 +9,15 @@ export default function OrderSummaryPage() {
   const { orderId } = useParams();
   const router = useRouter();
   const dispatch = useDispatch();
-  const { token } = useSelector((state) => state.auth);
   const { order, loading, error } = useSelector((state) => state.order);
 
   useEffect(() => {
-    if (!orderId || !token) return;
+    if (!orderId) return;
 
-    dispatch(fetchOrderById({ orderId, token }));
+    dispatch(fetchOrderById({ orderId }));
 
     return () => dispatch(clearOrder());
-  }, [dispatch, orderId, token]);
+  }, [dispatch, orderId]);
 
   if (loading)
     return (

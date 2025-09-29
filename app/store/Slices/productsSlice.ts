@@ -1,128 +1,79 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { Product, ProductsState } from "../../types/product";
+import api from "../../utils/axiosSetup";
 
-export const fetchProducts = createAsyncThunk<Product[], string>(
+export const fetchProducts = createAsyncThunk<Product[]>(
   "products/fetchProducts",
-  async (token, { rejectWithValue }) => {
-    if (!token) return rejectWithValue("Token not provided");
-
+  async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/products`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (res.status === 401) throw new Error("Unauthorized. Please login.");
-      if (!res.ok) throw new Error("Failed to fetch products");
-
-      const data = await res.json();
-
-      return data.date || [];
+      const res = await api.get("/products");
+      return res.data.date || [];
     } catch (err: any) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
 
-export const addProduct = createAsyncThunk<
-  Product,
-  { token: string; formData: any }
->("products/addProduct", async ({ token, formData }, { rejectWithValue }) => {
-  try {
-    const body = new FormData();
+export const addProduct = createAsyncThunk<Product, { formData: any }>(
+  "products/addProduct",
+  async ({ formData }, { rejectWithValue }) => {
+    try {
+      const body = new FormData();
 
-    for (const key in formData) {
-      const value = formData[key];
+      for (const key in formData) {
+        const value = formData[key];
 
-      if (key === "image" && value) {
-        body.append("photo", value);
-      } else if (key === "tags" && value) {
-        value.split(",").forEach((tag) => body.append("tags", tag.trim()));
-      } else if (key === "price" && value !== undefined) {
-        body.append("price", Number(value).toString());
-      } else if (value !== undefined) {
-        body.append(key, value);
+        if (key === "image" && value) {
+          body.append("photo", value);
+        } else if (key === "tags" && value) {
+          value.split(",").forEach((tag) => body.append("tags", tag.trim()));
+        } else if (key === "price" && value !== undefined) {
+          body.append("price", Number(value).toString());
+        } else if (value !== undefined) {
+          body.append(key, value);
+        }
       }
+
+      const res = await api.post("/products", body);
+      return await res.data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/products`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body,
-    });
-
-    if (!res.ok) throw new Error("Failed to add product");
-    console.log(res);
-    return await res.json();
-  } catch (err: any) {
-    return rejectWithValue(err.message);
   }
-});
+);
 
 export const updateProduct = createAsyncThunk<
   Product,
-  { token: string; id: string; formData: any }
->(
-  "products/updateProduct",
-  async ({ token, id, formData }, { rejectWithValue }) => {
-    try {
-      const body = new FormData();
-      for (const key in formData) {
-        if (key === "image" && formData.image) {
-          body.append("photo", formData.image);
-        } else {
-          body.append(key, formData[key]);
-        }
+  { id: string; formData: any }
+>("products/updateProduct", async ({ id, formData }, { rejectWithValue }) => {
+  try {
+    const body = new FormData();
+    for (const key in formData) {
+      if (key === "image" && formData.image) {
+        body.append("photo", formData.image);
+      } else {
+        body.append(key, formData[key]);
       }
+    }
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/products/${id}`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}` },
-          body,
-        }
-      );
+    const res = await api.put(`/products/${id}`, body);
+    return await res.data;
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data?.message || err.message);
+  }
+});
 
-      if (!res.ok) throw new Error("Failed to update product");
-      return await res.json();
+export const deleteProduct = createAsyncThunk<number, { id: number }>(
+  "products/deleteProduct",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const res = await api.delete(`/products/${id}`);
+      return id;
     } catch (err: any) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
-
-export const deleteProduct = createAsyncThunk<
-  number,
-  { token: string; id: number }
->("products/deleteProduct", async ({ token, id }, { rejectWithValue }) => {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/products/${id}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    if (!res.ok) {
-      const data = await res.json();
-      return rejectWithValue(data.message || "Failed to delete product");
-    }
-
-    return id;
-  } catch (err: any) {
-    return rejectWithValue(err.message);
-  }
-});
 
 const initialState: ProductsState = {
   products: [],

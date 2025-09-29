@@ -6,85 +6,56 @@ import {
   UpdateUserPayload,
   DeleteUserPayload,
 } from "../../types/user";
+import api from "../../utils/axiosSetup";
 
-export const fetchUsers = createAsyncThunk<User[], string>(
+export const fetchUsers = createAsyncThunk<User[]>(
   "user/fetchUsers",
-  async (token, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/users`, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-
-      if (!res.ok)
-        return rejectWithValue(data.message || "Failed to fetch users");
-      return data.filter((user: User) => user.role?.toLowerCase() !== "admin");
+      const res = await api.get("/users");
+      return res.data.filter(
+        (user: User) => user.role?.toLowerCase() !== "admin"
+      );
     } catch (err: any) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
 
 export const fetchUserById = createAsyncThunk<User, FetchUserByIdPayload>(
   "user/fetchUserById",
-  async ({ token, userId }, { rejectWithValue }) => {
+  async ({ userId }, { rejectWithValue }) => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const data = await res.json();
-      if (!res.ok)
-        return rejectWithValue(data.message || "Failed to fetch user");
-      return data;
+      const res = await api.get(`/users/${userId}`);
+      return res.data;
     } catch (err: any) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
 
 export const updateUser = createAsyncThunk<User, UpdateUserPayload>(
   "user/updateUser",
-  async ({ token, userId, formData }, { rejectWithValue }) => {
+  async ({ userId, formData }, { rejectWithValue }) => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/update`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        }
-      );
-      const data = await res.json();
-      if (!res.ok)
-        return rejectWithValue(data.message || "Failed to update user");
-      return data;
+      const res = await api.put(`/users/${userId}/update`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data;
     } catch (err: any) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
 
 export const deleteUser = createAsyncThunk<string, DeleteUserPayload>(
   "user/deleteUser",
-  async ({ token, userId }, { rejectWithValue }) => {
+  async ({ userId }, { rejectWithValue }) => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const data = await res.json();
-      if (!res.ok)
-        return rejectWithValue(data.message || "Failed to delete user");
+      await api.delete(`/users/${userId}`);
       return userId;
     } catch (err: any) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );

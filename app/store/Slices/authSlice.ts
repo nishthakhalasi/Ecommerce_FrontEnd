@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
 import { AuthState, User, LoginPayload, SignupPayload } from "../../types/auth";
+import api from "../../utils/axiosSetup";
+import axios from "axios";
 
 const initialState: AuthState = {
   user: null,
@@ -14,21 +15,19 @@ export const loginUser = createAsyncThunk<User, LoginPayload>(
   "auth/loginUser",
   async ({ email, password }, thunkAPI) => {
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/login`,
-        {
-          email,
-          password,
-        }
-      );
-      console.log("User logged in:", response.data);
-      console.log("Client IP:", response.data.ipAddress);
-
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
       return response.data;
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Login failed"
-      );
+      if (axios.isAxiosError(error)) {
+        return thunkAPI.rejectWithValue(
+          error.response?.data?.message || error.message
+        );
+      } else {
+        return thunkAPI.rejectWithValue(error.message || "Login failed");
+      }
     }
   }
 );
@@ -37,20 +36,39 @@ export const signupUser = createAsyncThunk<User, SignupPayload>(
   "auth/signupUser",
   async (formData, thunkAPI) => {
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/signup`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const res = await api.post("/auth/signup", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       return res.data;
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Signup failed"
-      );
+      if (axios.isAxiosError(error)) {
+        return thunkAPI.rejectWithValue(
+          error.response?.data?.message || error.message
+        );
+      } else {
+        return thunkAPI.rejectWithValue(error.message || "Login failed");
+      }
     }
   }
 );
+
+export const validateToken = async (token: string) => {
+  try {
+    const res = await api.post(
+      "/auth/validate",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data.valid;
+  } catch (err) {
+    return false;
+  }
+};
 
 const authSlice = createSlice({
   name: "auth",

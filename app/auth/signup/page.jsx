@@ -33,13 +33,10 @@ export default function SignUp() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(clearMessages());
-
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match");
       return;
     }
-
     const form = new FormData();
     form.append("name", formData.name);
     form.append("email", formData.email);
@@ -51,18 +48,9 @@ export default function SignUp() {
   };
   useEffect(() => {
     if (success) {
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        phone: "",
-      });
-      setProfileFile(null);
-      dispatch(clearMessages());
       router.push("/auth/login");
     }
-  }, [success, dispatch, router]);
+  }, [success, router]);
 
   if (loading) return <Spinner />;
 

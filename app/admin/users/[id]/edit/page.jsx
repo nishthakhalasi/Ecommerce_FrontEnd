@@ -12,7 +12,6 @@ export default function AdminEditUserPage() {
   const params = useParams();
   const userId = params.id;
   const dispatch = useDispatch();
-  const { token } = useSelector((state) => state.auth);
   const { selectedUser, selectedUserLoading, selectedUserError } = useSelector(
     (state) => state.user
   );
@@ -28,10 +27,10 @@ export default function AdminEditUserPage() {
 
   // Fetch user
   useEffect(() => {
-    if (token && userId) {
-      dispatch(fetchUserById({ token, userId }));
+    if (userId) {
+      dispatch(fetchUserById({ userId }));
     }
-  }, [token, userId, dispatch]);
+  }, [userId, dispatch]);
 
   // Update user
   useEffect(() => {
@@ -63,7 +62,6 @@ export default function AdminEditUserPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!token) return;
 
     const updateForm = new FormData();
     updateForm.append("name", formData.name);
@@ -74,7 +72,7 @@ export default function AdminEditUserPage() {
 
     try {
       const resultAction = await dispatch(
-        updateUser({ token, userId, formData: updateForm })
+        updateUser({ userId, formData: updateForm })
       );
       if (updateUser.fulfilled.match(resultAction)) {
         router.push("/admin/users");

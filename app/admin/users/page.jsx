@@ -10,20 +10,15 @@ import { deleteUser, fetchUsers } from "../../store/Slices/userSlice";
 export default function UsersPage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { token, loading } = useSelector((state) => state.auth);
   const { users, usersLoading, usersError } = useSelector(
     (state) => state.user
   );
 
   useEffect(() => {
-    if (token) {
-      dispatch(fetchUsers(token));
-    } else {
-      router.push("/auth/login");
-    }
-  }, [token, dispatch, router]);
+    dispatch(fetchUsers());
+  }, [dispatch, router]);
 
-  if (loading || usersLoading) return <Spinner />;
+  if (usersLoading) return <Spinner />;
   if (usersError) return <p className="text-red-500">{usersError}</p>;
 
   const uniqueUsers = Array.from(new Map(users.map((u) => [u.id, u])).values());
@@ -99,9 +94,7 @@ export default function UsersPage() {
                       return;
 
                     try {
-                      await dispatch(
-                        deleteUser({ token, userId: user.id })
-                      ).unwrap();
+                      await dispatch(deleteUser({ userId: user.id })).unwrap();
                       alert(" User deleted successfully!");
                     } catch (err) {
                       alert(`Error: ${err}`);

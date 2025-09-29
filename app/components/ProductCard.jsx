@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 
 export default function ProductCard({ product }) {
   const dispatch = useDispatch();
-  const { token } = useSelector((state) => state.auth);
 
   const cartItems = useSelector((state) => state.cart.items) || [];
   const [inCart, setInCart] = useState(false);
@@ -35,13 +34,9 @@ export default function ProductCard({ product }) {
   }, [cartItems, product.id]);
 
   const handleAddToCart = async () => {
-    if (!token) return alert("Please login first!");
     const result = await dispatch(
-      addToCartAPI({ token, productId: product.id, quantity })
+      addToCartAPI({ productId: product.id, quantity })
     ).unwrap();
-
-    console.log("Added cart item:", result);
-
     toast.success("Item added to cart!");
     setInCart(true);
     setQuantity(result.quantity);
@@ -49,11 +44,8 @@ export default function ProductCard({ product }) {
   };
 
   const handleQuantityChange = async (newQty) => {
-    if (!token || !cartItemId) return;
     setQuantity(newQty);
-    await dispatch(
-      updateCartQuantityAPI({ token, cartItemId, quantity: newQty })
-    );
+    await dispatch(updateCartQuantityAPI({ cartItemId, quantity: newQty }));
   };
 
   return (

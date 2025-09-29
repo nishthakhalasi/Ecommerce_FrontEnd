@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import api from "./utils/axiosSetup";
 
 const publicPaths = ["/auth/login", "/auth/signup"];
 
-export function middleware(req) {
+export async function middleware(req) {
   const token = req.cookies.get("token")?.value;
   const role = req.cookies.get("role")?.value || "USER";
   const url = req.nextUrl.clone();
@@ -14,6 +15,14 @@ export function middleware(req) {
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
+  }
+
+  const isValid = await validateTokenOnServer(token);
+  if (!isValid) {
+    const res = NextResponse.redirect(new URL("/auth/login", req.url));
+    res.cookies.delete("token");
+    res.cookies.delete("role");
+    return res;
   }
 
   if (path === "/") {

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { Order } from "../../types/order";
 import { RootState } from "../store";
+import api from "../../utils/axiosSetup";
 
 interface OrderState {
   order: Order | null;
@@ -15,47 +16,27 @@ const initialState: OrderState = {
 };
 
 // Fetch order by ID
-export const fetchOrderById = createAsyncThunk<
-  Order,
-  { orderId: string; token: string }
->("order/fetchOrderById", async ({ orderId, token }, { rejectWithValue }) => {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/orders/${orderId}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const data = await res.json();
-    if (!res.ok)
-      return rejectWithValue(data.message || "Failed to fetch order");
-    return data;
-  } catch (err: any) {
-    return rejectWithValue(err.message);
+export const fetchOrderById = createAsyncThunk<Order, { orderId: string }>(
+  "order/fetchOrderById",
+  async ({ orderId }, { rejectWithValue }) => {
+    try {
+      const res = await api.get(`/orders/${orderId}`);
+      return res.data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
   }
-});
+);
 
 // Create order after successful payment
-export const createOrder = createAsyncThunk<Order, { token: string }>(
+export const createOrder = createAsyncThunk<Order>(
   "order/createOrder",
-  async ({ token }, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      if (!res.ok)
-        return rejectWithValue(data.message || "Failed to create order");
-      return data;
+      const res = await api.post("/orders");
+      return res.data;
     } catch (err: any) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
